@@ -25,7 +25,8 @@ a { color: inherit; text-decoration: none; }
   height: 100dvh; max-width: 1360px; margin: 0 auto; display: flex; align-items: center; gap: clamp(32px, 5vw, 88px);
   padding: clamp(20px, 5vh, 56px) clamp(16px, 4vw, 56px);
 }
-.hero-copy { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
+/* A fixed width, so an opening answer never widens the column and squeezes the video. */
+.hero-copy { flex: 0 0 clamp(320px, 32vw, 460px); display: flex; flex-direction: column; align-items: flex-start; }
 .mascot-home { width: clamp(96px, 15vh, 140px); aspect-ratio: 1; flex: none; visibility: hidden; }
 .title {
   margin: clamp(8px, 2vh, 20px) 0 0; font-size: clamp(26px, 4.4vh, 42px); font-weight: 400;
@@ -51,7 +52,10 @@ a { color: inherit; text-decoration: none; }
 
 /* FAQ under the buttons: one answer open at a time, opening smoothly. */
 :root { interpolate-size: allow-keywords; }
-.faq { width: 100%; max-width: 440px; margin-top: clamp(20px, 4vh, 40px); }
+/* min-height is set by js/faq.js to the height with the tallest answer open, so opening one never
+   moves the text above it. */
+.faq { width: 100%; margin-top: clamp(20px, 4vh, 40px); }
+.faq.measuring details::details-content { transition: none; }
 .faq details { border-top: 1px solid var(--border); }
 .faq details:last-child { border-bottom: 1px solid var(--border); }
 .faq summary {
@@ -75,7 +79,7 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 860px) {
   html, body { overflow: auto; }
   .page { height: auto; min-height: 100dvh; flex-direction: column; align-items: stretch; gap: 20px; }
-  .hero-copy { align-items: center; text-align: center; }
+  .hero-copy { flex: none; width: 100%; max-width: 480px; margin: 0 auto; align-items: center; text-align: center; }
   .cta-row { justify-content: center; }
   .faq { text-align: left; }
   .video-frame { flex: none; container-type: normal; }
