@@ -49,15 +49,37 @@ a { color: inherit; text-decoration: none; }
 .pill-icon svg { width: 18px; height: 18px; transition: transform .2s ease-out; }
 .pill-icon:hover svg { transform: scale(1.08); }
 
+/* FAQ under the buttons: one answer open at a time, opening smoothly. */
+:root { interpolate-size: allow-keywords; }
+.faq { width: 100%; max-width: 440px; margin-top: clamp(20px, 4vh, 40px); }
+.faq details { border-top: 1px solid var(--border); }
+.faq details:last-child { border-bottom: 1px solid var(--border); }
+.faq summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 2px;
+  font-size: 14px; font-weight: 500; cursor: pointer; list-style: none; user-select: none;
+  color: oklch(0.985 0 0 / 0.86); transition: color .2s;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary:hover, .faq details[open] summary { color: var(--foreground); }
+.faq summary .lucide { width: 16px; height: 16px; flex: none; opacity: .6; transition: transform .25s ease-out; }
+.faq details[open] summary .lucide { transform: rotate(180deg); }
+.faq details::details-content { block-size: 0; overflow: hidden; transition: block-size .25s ease-out, content-visibility .25s allow-discrete; }
+.faq details[open]::details-content { block-size: auto; }
+.faq p { margin: 0 0 12px; padding: 0 2px; font-size: 13.5px; line-height: 1.55; color: oklch(0.985 0 0 / 0.6); }
+
 /* The video takes whatever height is left, at its own shape. */
 .video-frame {
   flex: 1 1 auto; align-self: stretch; min-width: 0; min-height: 0;
   display: flex; align-items: center; justify-content: center; container-type: size;
 }
 @media (max-width: 860px) {
-  .page { flex-direction: column; align-items: stretch; gap: 20px; }
+  html, body { overflow: auto; }
+  .page { height: auto; min-height: 100dvh; flex-direction: column; align-items: stretch; gap: 20px; }
   .hero-copy { align-items: center; text-align: center; }
   .cta-row { justify-content: center; }
+  .faq { text-align: left; }
+  .video-frame { flex: none; container-type: normal; }
+  .video-frame video { width: 100%; }
 }
 .video-frame video {
   display: block; width: min(1200px, 100cqw, 100cqh * 704 / 628); height: auto;

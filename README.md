@@ -21,10 +21,25 @@ every search locally first.
 - **Apps and games** from the Start menu, Store apps, Steam, Epic, and other launchers, with icons
   and descriptions.
 - **Folders and files** by name, kept current as files change.
-- **Smart search** (optional): understands descriptions instead of names. It uses your own
-  [Vercel AI Gateway](https://vercel.com/ai-gateway) key.
+- **Smart search** (optional): understands descriptions instead of names. It runs on Jev, an AI
+  model by TypeSafe, through [Vercel AI Gateway](https://vercel.com/ai-gateway) with your own key.
+  Without a key, Jevdexer only matches names.
 - **Ultra Search** (optional): search inside the folders you choose: text in documents, scans and
   screenshots (OCR), and what photos show. Everything is read and understood on your PC, on the CPU.
+
+## Cost
+
+The app is free. The AI is not: Vercel bills your own Gateway account per use, and its free tier
+does not include Jev, so you need a few dollars of paid credit. Measured on a PC with 131 apps:
+
+| What | Cost |
+|---|---|
+| One smart app search | about $0.00024 (around 4,000 per dollar) |
+| One smart folder search (up to 120 folder summaries) | about $0.00034 |
+| Describing your installed apps, once | under $0.01 |
+
+At 30 smart searches a day, $5 lasts about two years. Searches that match a name exactly never
+call the AI and cost nothing.
 
 ## Privacy
 

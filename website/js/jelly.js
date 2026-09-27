@@ -3,8 +3,8 @@
    The mesh is a soft body solved with XPBD in small substeps: every edge and diagonal is a soft
    spring, every triangle keeps its area (jelly does not compress), and a weak shape match pulls
    the whole body back to its drawn shape. Grab a spot and that spot follows the pointer while the
-   rest hangs from it under gravity and sloshes behind fast moves. The headline, the buttons and
-   the video are solid: it bumps into them, slides along them and can rest on top of them. Let go
+   rest hangs from it under gravity and sloshes behind fast moves. The headline, the buttons, the
+   FAQ and the video are solid: it bumps into them, slides along them and can rest on top of them. Let go
    and it falls until something holds it up. A click without a drag pokes it. */
 (function () {
   const home = document.querySelector('[data-mascot-home]');
@@ -343,6 +343,7 @@
     });
     document.querySelectorAll('.cta-row a').forEach((el) => { const r = el.getBoundingClientRect(); add(r, r.height / 2); });
     document.querySelectorAll('.video-frame video').forEach((el) => add(el.getBoundingClientRect(), 16));
+    document.querySelectorAll('.faq details').forEach((el) => add(el.getBoundingClientRect(), 4));
     solids = list;
   }
   measureSolids();
@@ -350,6 +351,8 @@
   window.addEventListener('load', measureSolids);
   if (document.fonts) document.fonts.ready.then(measureSolids);
   setInterval(measureSolids, 1000);
+  // FAQ answers change height as they open and close.
+  document.querySelectorAll('.faq details').forEach((el) => el.addEventListener('toggle', () => { measureSolids(); setTimeout(measureSolids, 300); }));
 
   let hit = 0, contact = false, crushed = 0;
   function limitStrain() {
