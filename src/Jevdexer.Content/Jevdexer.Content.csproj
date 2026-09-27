@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Content understanding for Ultra Search: text extraction, OCR, keyword summaries, and the local
+       models (multilingual text embeddings, CLIP photo tags). The extractors parse untrusted files,
+       so only Jevdexer.Worker calls them, inside the sandbox. Core uses the text embedder
+       only, for the user's own query. -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- CLIP text vectors for the photo vocabulary (tools/ultra/photo_vocab.py). -->
+    <EmbeddedResource Include="Models\photo-vocab.json" LogicalName="Jevdexer.Content.photo-vocab.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Jevdexer.Core.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" />
+    <PackageReference Include="PdfPig" Version="0.1.16" />
+  </ItemGroup>
+
+</Project>

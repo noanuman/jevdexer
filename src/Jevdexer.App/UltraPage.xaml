@@ -1,0 +1,119 @@
+<UserControl x:Class="Jevdexer.App.UltraPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:app="clr-namespace:Jevdexer.App">
+    <StackPanel>
+        <!-- Empty state: one clear action. -->
+        <Border x:Name="EmptyCard" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource Border}" Padding="24,22" Margin="0,4,0,8">
+            <StackPanel HorizontalAlignment="Center">
+                <app:Mascot Width="60" Height="60" HorizontalAlignment="Center" />
+                <TextBlock Text="Search inside your files" Style="{StaticResource Text.Label}" HorizontalAlignment="Center" Margin="0,12,0,0" />
+                <TextBlock Style="{StaticResource Text.Muted}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,4,0,0" TextWrapping="Wrap" MaxWidth="360"
+                           Text="Pick a folder and find documents, scans and photos by what is in them." />
+                <Button Style="{StaticResource Button}" HorizontalAlignment="Center" Margin="0,16,0,0" Click="Add_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <app:Icon Data="{StaticResource Icon.FolderPlus}" Size="15" Margin="0,0,8,0" />
+                        <TextBlock Text="Add a folder" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Folders -->
+        <Grid x:Name="FoldersHeader" Margin="0,0,0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <TextBlock Text="Folders" Style="{StaticResource Text.Label}" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Style="{StaticResource Button.Outline}" Height="32" Padding="12,0" Click="Add_Click">
+                <StackPanel Orientation="Horizontal">
+                    <app:Icon Data="{StaticResource Icon.FolderPlus}" Size="14" Margin="0,0,8,0" />
+                    <TextBlock Text="Add folder" FontSize="13" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- A new folder: the estimate first. -->
+        <Border x:Name="Confirm" Visibility="Collapsed" Margin="0,8,0,4" Padding="16,14" CornerRadius="8"
+                BorderThickness="1" BorderBrush="{DynamicResource Border}" Background="{DynamicResource Muted}">
+            <StackPanel>
+                <TextBlock x:Name="ConfirmTitle" Style="{StaticResource Text.Label}" TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Name="ConfirmEstimate" Style="{StaticResource Text.Muted}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                <StackPanel x:Name="SensitivePanel" Orientation="Horizontal" Margin="0,12,0,0" Visibility="Collapsed">
+                    <ToggleButton x:Name="ConfirmLocalOnly" Style="{StaticResource Switch}" VerticalAlignment="Center" IsChecked="True" />
+                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="380" FontSize="13"
+                               Text="Looks personal. Keep it private: nothing from it goes online." />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                    <Button Style="{StaticResource Button.Ghost}" Height="32" Click="ConfirmCancel_Click" Content="Cancel" />
+                    <Button x:Name="ConfirmStart" Style="{StaticResource Button}" Height="32" Margin="8,0,0,0" Click="ConfirmStart_Click" Content="Add" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <ItemsControl x:Name="FolderList">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type app:UltraFolderRow}">
+                    <Border BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Border}" Padding="0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <app:Icon Data="{StaticResource Icon.Folder}" Size="17" Foreground="{DynamicResource MutedForeground}" VerticalAlignment="Top" Margin="0,2,12,0" />
+                            <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Path}" />
+                                <TextBlock Text="{Binding Detail}" Style="{StaticResource Text.Muted}" FontSize="12.5" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" ToolTip="Private folders never go online, not even as a summary.">
+                                <TextBlock Text="Private" FontSize="12.5" Foreground="{DynamicResource MutedForeground}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <ToggleButton Style="{StaticResource Switch}" IsChecked="{Binding LocalOnly, Mode=OneWay}" Tag="{Binding Path}" Click="LocalOnly_Click" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Button Grid.Column="3" Style="{StaticResource Button.Icon}" Margin="10,0,-6,0" VerticalAlignment="Center" Tag="{Binding Path}" Click="Remove_Click" ToolTip="Remove this folder">
+                                <app:Icon Data="{StaticResource Icon.X}" Size="15" />
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Progress -->
+        <Grid x:Name="ProgressPanel" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock x:Name="ProgressText" FontSize="13" Foreground="{DynamicResource MutedForeground}" TextTrimming="CharacterEllipsis" />
+                <Border x:Name="ProgressTrack" Height="6" CornerRadius="3" Background="{DynamicResource Muted}" Margin="0,6,0,0" SizeChanged="ProgressTrack_SizeChanged">
+                    <Border x:Name="ProgressFill" HorizontalAlignment="Left" CornerRadius="3" Background="{DynamicResource Primary}" Width="0" />
+                </Border>
+            </StackPanel>
+            <Button x:Name="PauseButton" Grid.Column="1" Style="{StaticResource Button.Ghost}" Height="30" Padding="10,0" Click="Pause_Click" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <app:Icon x:Name="PauseIcon" Data="{StaticResource Icon.Pause}" Size="13" Margin="0,0,6,0" />
+                    <TextBlock x:Name="PauseText" Text="Pause" FontSize="13" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Options -->
+        <Border x:Name="OptionsSeparator" Style="{StaticResource Separator}" Margin="0,18,0,0" />
+        <Grid x:Name="FullRow" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="Understand photos and meaning" Style="{StaticResource Text.Label}" />
+                <TextBlock x:Name="FullHelp" Style="{StaticResource Text.Muted}" Margin="0,2,0,0" TextWrapping="Wrap" />
+            </StackPanel>
+            <ToggleButton x:Name="FullSwitch" Grid.Column="1" Style="{StaticResource Switch}" VerticalAlignment="Center" Click="Full_Click" />
+        </Grid>
+        <Grid x:Name="CapRow" Margin="0,18,0,0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="Help from Jev" Style="{StaticResource Text.Label}" />
+                <TextBlock x:Name="CapHelp" Style="{StaticResource Text.Muted}" Margin="0,2,0,0" TextWrapping="Wrap" />
+            </StackPanel>
+            <app:TabsList x:Name="CapTabs" Grid.Column="1" VerticalAlignment="Center">
+                <RadioButton x:Name="CapOff" Style="{StaticResource Tab}" GroupName="Cap" Checked="Cap_Checked" Tag="0"><TextBlock Text="Off" /></RadioButton>
+                <RadioButton x:Name="Cap100" Style="{StaticResource Tab}" GroupName="Cap" Checked="Cap_Checked" Tag="100"><TextBlock Text="100" /></RadioButton>
+                <RadioButton x:Name="Cap300" Style="{StaticResource Tab}" GroupName="Cap" Checked="Cap_Checked" Tag="300"><TextBlock Text="300" /></RadioButton>
+                <RadioButton x:Name="Cap1000" Style="{StaticResource Tab}" GroupName="Cap" Checked="Cap_Checked" Tag="1000"><TextBlock Text="1,000" /></RadioButton>
+            </app:TabsList>
+        </Grid>
+    </StackPanel>
+</UserControl>

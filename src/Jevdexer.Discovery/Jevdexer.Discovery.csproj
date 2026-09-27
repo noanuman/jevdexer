@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- LibraryImport source generator emits unsafe marshalling code (Interop/KnownFolders.cs). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Jevdexer.Discovery.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Steam tag and genre id to name table. Generated once, see Enrichment/SteamTags.cs. -->
+    <EmbeddedResource Include="Enrichment\steam-tags.json" LogicalName="steam-tags.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Ultra/Sandbox.cs: Win32 structs for the AppContainer launch. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jevdexer.Discovery\Jevdexer.Discovery.csproj" />
+    <!-- Ultra Search: the text embedder for queries, and the worker protocol. Never the extractors, which run only in the sandboxed worker. -->
+    <ProjectReference Include="..\Jevdexer.Content\Jevdexer.Content.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Jevdexer.Core.Tests" />
+  </ItemGroup>
+
+</Project>

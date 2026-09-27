@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+*.user
+node_modules/
+__pycache__/
+.vercel/
+artifacts/
+website/_preview/
+tools/ultra/.cache/

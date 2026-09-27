@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Jevdexer mascot">
+  <!-- Vector twin of brand/mascot.png, traced by tools/brand/trace_mascot.py. Ids are animation hooks. -->
+  <defs>
+    <!-- Soft volume like the render: lit from the upper left. -->
+    <radialGradient id="mascot-shade" cx="0.38" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#2b2b2f"/>
+      <stop offset="0.55" stop-color="#141416"/>
+      <stop offset="1" stop-color="#070708"/>
+    </radialGradient>
+  </defs>
+  <path id="body" d="M57.90 8.08 C54.94 8.19 51.98 9.04 49.03 10.46 C46.07 11.89 43.11 14.27 40.16 16.63 C37.20 18.99 34.24 22.47 31.29 24.63 C28.33 26.80 25.28 27.48 22.42 29.61 C19.55 31.74 16.16 34.62 14.09 37.40 C12.01 40.17 10.90 43.31 9.98 46.27 C9.06 49.22 9.31 52.18 8.57 55.14 C7.83 58.09 6.34 61.05 5.54 64.01 C4.75 66.96 3.11 70.08 3.81 72.88 C4.51 75.67 7.29 78.95 9.76 80.77 C12.23 82.59 15.67 82.36 18.63 83.80 C21.59 85.25 24.54 88.11 27.50 89.43 C30.46 90.74 33.41 91.36 36.37 91.70 C39.33 92.04 42.28 91.66 45.24 91.48 C48.20 91.30 51.15 90.76 54.11 90.62 C57.07 90.47 60.02 90.78 62.98 90.62 C65.94 90.46 68.89 90.35 71.85 89.64 C74.81 88.94 77.78 88.11 80.72 86.40 C83.66 84.69 87.17 82.02 89.48 79.37 C91.79 76.72 93.43 73.45 94.57 70.50 C95.70 67.54 96.21 64.58 96.30 61.63 C96.39 58.67 95.97 55.71 95.11 52.76 C94.24 49.80 92.91 46.85 91.10 43.89 C89.30 40.93 86.40 37.98 84.29 35.02 C82.18 32.06 80.07 29.11 78.45 26.15 C76.83 23.19 76.50 20.00 74.55 17.28 C72.61 14.56 69.54 11.35 66.77 9.82 C63.99 8.28 60.85 7.98 57.90 8.08 Z" fill="url(#mascot-shade)"/>
+  <g id="eye-left">
+    <ellipse id="eye-left-white" cx="39.65" cy="56.85" rx="6.72" ry="7.03" fill="#f4f2ee"/>
+    <circle id="eye-left-pupil" cx="42.32" cy="56.62" r="4.93" fill="#0b0b0c"/>
+    <circle id="eye-left-shine" cx="44.05" cy="54.65" r="1.38" fill="#f4f2ee"/>
+  </g>
+  <g id="eye-right">
+    <ellipse id="eye-right-white" cx="69.78" cy="52.96" rx="6.45" ry="6.84" fill="#f4f2ee"/>
+    <circle id="eye-right-pupil" cx="67.49" cy="53.4" r="5.03" fill="#0b0b0c"/>
+    <circle id="eye-right-shine" cx="69.25" cy="51.39" r="1.41" fill="#f4f2ee"/>
+  </g>
+  <path id="smile" d="M51.41 60.87 Q55.52 63.53 59.63 60.65" fill="none" stroke="#f4f2ee" stroke-width="1.57" stroke-linecap="round"/>
+</svg>

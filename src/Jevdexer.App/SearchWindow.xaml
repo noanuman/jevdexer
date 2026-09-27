@@ -1,0 +1,202 @@
+<Window x:Class="Jevdexer.App.SearchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:app="clr-namespace:Jevdexer.App"
+        Title="Jevdexer" Width="688" Height="860"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Icon="/Assets/Jevdexer.ico" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
+        FontFamily="{StaticResource Sans}" FontSize="14" FontWeight="Medium"
+        TextOptions.TextFormattingMode="Display" UseLayoutRounding="True">
+    <Window.Resources>
+        <!-- Section heading: not selectable, skipped by the arrow keys. The count shows when a section scrolls. -->
+        <DataTemplate DataType="{x:Type app:HeaderItem}">
+            <Grid Margin="8,10,4,4">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource Text.GroupHeading}" />
+                    <TextBlock Text="{Binding CountText}" Style="{StaticResource Text.GroupHeading}" Opacity="0.6" Margin="6,0,0,0" />
+                </StackPanel>
+                <Button Style="{StaticResource Button.Link}" HorizontalAlignment="Right" Click="ClearHistory_Click"
+                        Visibility="{Binding ClearVisibility}" ToolTip="Forget recent searches (kept on this PC only)">
+                    <StackPanel Orientation="Horizontal">
+                        <app:Icon Data="{StaticResource Icon.Trash2}" Size="12" Margin="0,0,5,0" />
+                        <TextBlock Text="Clear" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </DataTemplate>
+
+        <!-- An app. -->
+        <DataTemplate DataType="{x:Type app:ResultItem}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="28" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Width="28" Height="28" CornerRadius="6" Background="{DynamicResource Muted}" Visibility="{Binding InitialVisibility}">
+                    <TextBlock Text="{Binding Initial}" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="{DynamicResource MutedForeground}" />
+                </Border>
+                <Image Source="{Binding Icon}" Width="28" Height="28" RenderOptions.BitmapScalingMode="HighQuality" />
+                <StackPanel Grid.Column="1" Margin="12,0,8,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Foreground}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MutedForeground}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Style="{StaticResource WhenSelected}">
+                    <TextBlock Text="Open" FontSize="12" Foreground="{DynamicResource MutedForeground}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <Border Style="{StaticResource Kbd}"><app:Icon Data="{StaticResource Icon.CornerDownLeft}" Size="11" /></Border>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <!-- A file or folder. -->
+        <DataTemplate DataType="{x:Type app:FileItem}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="28" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <app:Icon Data="{Binding FallbackIcon}" Size="18" Foreground="{DynamicResource MutedForeground}" Visibility="{Binding FallbackVisibility}" />
+                <Image Source="{Binding Icon}" Width="24" Height="24" RenderOptions.BitmapScalingMode="HighQuality" />
+                <StackPanel Grid.Column="1" Margin="12,0,8,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Foreground}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MutedForeground}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Style="{StaticResource WhenSelected}">
+                    <Border Style="{StaticResource Kbd}"><TextBlock Text="Ctrl" /></Border>
+                    <Border Style="{StaticResource Kbd}" Margin="3,0,0,0"><app:Icon Data="{StaticResource Icon.CornerDownLeft}" Size="11" /></Border>
+                    <TextBlock Text="Show in folder" FontSize="12" Foreground="{DynamicResource MutedForeground}" VerticalAlignment="Center" Margin="6,0,14,0" />
+                    <TextBlock Text="Open" FontSize="12" Foreground="{DynamicResource MutedForeground}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <Border Style="{StaticResource Kbd}"><app:Icon Data="{StaticResource Icon.CornerDownLeft}" Size="11" /></Border>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <!-- A recent search. -->
+        <DataTemplate DataType="{x:Type app:RecentItem}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="28" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Width="28" Height="28" CornerRadius="6" Background="{DynamicResource Muted}" Visibility="{Binding FallbackVisibility}">
+                    <app:Icon Data="{StaticResource Icon.History}" Size="14" Foreground="{DynamicResource MutedForeground}" />
+                </Border>
+                <Image Source="{Binding Icon}" Width="28" Height="28" RenderOptions.BitmapScalingMode="HighQuality" />
+                <StackPanel Grid.Column="1" Margin="12,0,8,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Query}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Foreground}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MutedForeground}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Style="{StaticResource WhenSelected}">
+                    <TextBlock Text="Search" FontSize="12" Foreground="{DynamicResource MutedForeground}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <Border Style="{StaticResource Kbd}"><app:Icon Data="{StaticResource Icon.CornerDownLeft}" Size="11" /></Border>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <!-- A section: its heading, then its own scrollable list of rows. -->
+        <DataTemplate DataType="{x:Type app:ResultSection}">
+            <StackPanel>
+                <ContentPresenter Content="{Binding Header}" />
+                <ListBox ItemsSource="{Binding Rows}" MaxHeight="{Binding MaxHeight}" Tag="{Binding}" Loaded="Section_Loaded"
+                         ItemContainerStyle="{StaticResource CommandItem}" BorderThickness="0" Background="Transparent" Focusable="False"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.CanContentScroll="False"
+                         MouseUp="Section_MouseUp" MouseMove="Section_MouseMove">
+                    <ListBox.Resources>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource ScrollBar.Thin}" />
+                    </ListBox.Resources>
+                </ListBox>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <!-- Command dialog. Drag any empty part of it to move the window. -->
+    <!-- The window keeps one height and the surface grows inside it (the rest is transparent and
+         click-through): resizing the window on every keystroke makes the box jitter. -->
+    <Border x:Name="Surface" Style="{StaticResource Surface.Popover}" Margin="24" VerticalAlignment="Top" MouseLeftButtonDown="Surface_MouseLeftButtonDown">
+        <StackPanel>
+            <!-- CommandInput -->
+            <Grid Height="52" Margin="20,0,16,0" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <app:Icon Data="{StaticResource Icon.Search}" Size="16" Foreground="{DynamicResource MutedForeground}" VerticalAlignment="Center" />
+                <TextBox x:Name="Query" Grid.Column="1" Margin="14,0,0,0" Style="{StaticResource Input.Bare}" FontSize="15"
+                         Tag="Search apps, folders and files..." TextChanged="Query_TextChanged" VerticalAlignment="Stretch" />
+            </Grid>
+            <Border Style="{StaticResource Separator}" />
+
+            <!-- Scope -->
+            <app:TabsList Margin="12,10,12,2">
+                <RadioButton x:Name="ScopeAll" Style="{StaticResource Tab}" GroupName="Scope" IsChecked="True" Checked="Scope_Checked">
+                    <StackPanel Orientation="Horizontal">
+                        <app:Icon Data="{StaticResource Icon.LayoutGrid}" Size="14" Margin="0,0,6,0" />
+                        <TextBlock Text="All" />
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton x:Name="ScopeApps" Style="{StaticResource Tab}" GroupName="Scope" Checked="Scope_Checked">
+                    <StackPanel Orientation="Horizontal">
+                        <app:Icon Data="{StaticResource Icon.AppWindow}" Size="14" Margin="0,0,6,0" />
+                        <TextBlock Text="Apps" />
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton x:Name="ScopeFolders" Style="{StaticResource Tab}" GroupName="Scope" Checked="Scope_Checked">
+                    <StackPanel Orientation="Horizontal">
+                        <app:Icon Data="{StaticResource Icon.Folder}" Size="14" Margin="0,0,6,0" />
+                        <TextBlock Text="Folders" />
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton x:Name="ScopeFiles" Style="{StaticResource Tab}" GroupName="Scope" Checked="Scope_Checked">
+                    <StackPanel Orientation="Horizontal">
+                        <app:Icon Data="{StaticResource Icon.File}" Size="14" Margin="0,0,6,0" />
+                        <TextBlock Text="Files" />
+                    </StackPanel>
+                </RadioButton>
+            </app:TabsList>
+
+            <!-- CommandList: sections of results, or recent searches when the box is empty -->
+            <!-- Each section scrolls on its own; the whole list scrolls only if the sections outgrow the screen. -->
+            <ScrollViewer x:Name="Results" Margin="8,0,8,6" MaxHeight="620" Visibility="Collapsed" Focusable="False"
+                          VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl x:Name="Sections" Focusable="False" />
+            </ScrollViewer>
+
+            <!-- CommandEmpty / hint -->
+            <StackPanel x:Name="EmptyPanel" Margin="16,20,16,18" Visibility="Collapsed">
+                <!-- The mascot keeps the empty states company: it looks down when nothing is found. -->
+                <app:Mascot x:Name="EmptyMascot" Width="52" Height="52" HorizontalAlignment="Center" Margin="0,0,0,10" />
+                <TextBlock x:Name="Empty" Style="{StaticResource Text.Muted}" TextAlignment="Center" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <!-- Footer -->
+            <Border Style="{StaticResource Separator}" />
+            <Grid Margin="14,8,8,8" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <app:Icon x:Name="StatusIcon" Data="{StaticResource Icon.Sparkles}" Size="13" Foreground="{DynamicResource MutedForeground}" />
+                    <TextBlock x:Name="Status" FontSize="12" Foreground="{DynamicResource MutedForeground}" Margin="7,0,0,0"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="330" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Style="{StaticResource Kbd}"><app:Icon Data="{StaticResource Icon.ArrowUp}" Size="11" /></Border>
+                    <Border Style="{StaticResource Kbd}" Margin="3,0,0,0"><app:Icon Data="{StaticResource Icon.ArrowDown}" Size="11" /></Border>
+                    <TextBlock Text="Navigate" FontSize="12" Foreground="{DynamicResource MutedForeground}" Margin="6,0,14,0" VerticalAlignment="Center" />
+                    <Border Style="{StaticResource Kbd}"><TextBlock Text="Tab" /></Border>
+                    <TextBlock Text="Scope" FontSize="12" Foreground="{DynamicResource MutedForeground}" Margin="6,0,14,0" VerticalAlignment="Center" />
+                    <Border Style="{StaticResource Kbd}"><TextBlock Text="Esc" /></Border>
+                    <TextBlock Text="Close" FontSize="12" Foreground="{DynamicResource MutedForeground}" Margin="6,0,10,0" VerticalAlignment="Center" />
+                    <Button Style="{StaticResource Button.Icon}" Click="Settings_Click" ToolTip="Settings (Ctrl+,)">
+                        <app:Icon Data="{StaticResource Icon.Settings}" Size="15" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

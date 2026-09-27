@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The content worker: parses untrusted files inside an AppContainer with no network and no
+       file access. It only sees the bytes the app pipes to it. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Jevdexer.Worker</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jevdexer.Content\Jevdexer.Content.csproj" />
+  </ItemGroup>
+
+</Project>

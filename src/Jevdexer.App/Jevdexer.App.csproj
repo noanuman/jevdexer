@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <!-- NotifyIcon (tray) only; the UI itself is WPF. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Jevdexer</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- Program.Main runs Velopack's hooks before WPF starts; App.xaml is built as a Page. -->
+    <StartupObject>Jevdexer.App.Program</StartupObject>
+
+    <!-- What Windows shows in Properties, Task Manager and the installer. The release version comes
+         from scripts/package.ps1 (-p:Version=...). -->
+    <Version>0.1.0</Version>
+    <Product>Jevdexer</Product>
+    <Company>Jevdexer</Company>
+    <Description>Search your PC by name or by what things do.</Description>
+    <Copyright>Copyright 2026 Jevdexer</Copyright>
+    <ApplicationIcon>Assets\Jevdexer.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WFO0003 wants WinForms apps to set DPI in code. This is a WPF app (WinForms only for the
+         tray icon), and for WPF the manifest is the supported place for PerMonitorV2. -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- WinForms is only for the tray icon; keep its types out of the global namespace (KeyEventArgs clashes). -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Inter (OFL); licences ship next to the fonts. -->
+    <Resource Include="Assets\Fonts\*.ttf" />
+    <Resource Include="Assets\Jevdexer.ico" />
+    <!-- Tray icons: the mascot, for light and dark taskbars (tools/brand/make_icons.py). -->
+    <Resource Include="Assets\tray-dark.png;Assets\tray-light.png" />
+    <None Include="Assets\Fonts\Inter-OFL.txt;Assets\Lucide-ISC.txt" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The tour's screen recording: a file next to the exe (MediaElement plays files, not resources). -->
+    <None Include="Assets\Tour\explainer.mp4" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jevdexer.Core\Jevdexer.Core.csproj" />
+    <!-- The sandboxed content worker ships next to the app (Ultra Search). -->
+    <ProjectReference Include="..\Jevdexer.Worker\Jevdexer.Worker.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Velopack" Version="1.2.158" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,74 @@
+/* One screen, no scrolling: the mascot, the line, two buttons, the video. Dark only. */
+:root {
+  --background: oklch(0.135 0 0);
+  --foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.29 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --ring: oklch(0.556 0 0);
+  --lift: 1.16;           /* hover for a fill that matches the page */
+  --lift-inverted: 0.9;   /* hover for a fill that opposes it */
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  margin: 0; background: var(--background); color: var(--foreground);
+  font-family: "Figtree", ui-sans-serif, system-ui, sans-serif; font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* Text on the left, the video on the right; stacked on narrow screens. */
+.page {
+  height: 100dvh; max-width: 1360px; margin: 0 auto; display: flex; align-items: center; gap: clamp(32px, 5vw, 88px);
+  padding: clamp(20px, 5vh, 56px) clamp(16px, 4vw, 56px);
+}
+.hero-copy { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-start; }
+.mascot-home { width: clamp(96px, 15vh, 140px); aspect-ratio: 1; flex: none; visibility: hidden; }
+.title {
+  margin: clamp(8px, 2vh, 20px) 0 0; font-size: clamp(26px, 4.4vh, 42px); font-weight: 400;
+  letter-spacing: -0.025em; line-height: 1.12;
+}
+
+/* Pill buttons: brightness lift on hover, a 1px press, and the icon
+   slides out while its copy slides in (only on Follow on X). */
+.cta-row { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 10px; margin-top: clamp(16px, 3vh, 28px); }
+.pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; padding: 0 20px; border-radius: 999px; font-size: 14px; font-weight: 500; white-space: nowrap;
+  transition: filter .2s ease-out, transform .15s ease-out; user-select: none;
+}
+.pill:active { transform: translateY(1px); }
+.pill-primary { background: var(--primary); color: var(--primary-foreground); box-shadow: inset 0 1px 0 rgba(255,255,255,.14); }
+.pill-primary:hover { filter: brightness(var(--lift-inverted)); }
+.pill-neutral { background: var(--secondary); color: var(--foreground); }
+.pill-neutral:hover { filter: brightness(var(--lift)); }
+.slide { position: relative; display: inline-block; width: 16px; height: 16px; overflow: hidden; }
+.slide .lucide { position: absolute; inset: 0; width: 100%; height: 100%; transition: transform .3s ease-out; }
+/* The arrow leaves up and to the right, and its copy arrives from the bottom left. */
+.pill .lucide { width: 16px; height: 16px; }
+.slide .lucide:last-child { transform: translate(-150%, 150%); }
+.pill:hover .slide .lucide:first-child { transform: translate(150%, -150%); }
+.pill:hover .slide .lucide:last-child { transform: translate(0, 0); }
+/* The video takes whatever height is left, at its own shape. */
+.video-frame {
+  flex: 1 1 auto; align-self: stretch; min-width: 0; min-height: 0;
+  display: flex; align-items: center; justify-content: center; container-type: size;
+}
+@media (max-width: 860px) {
+  .page { flex-direction: column; align-items: stretch; gap: 20px; }
+  .hero-copy { align-items: center; text-align: center; }
+  .cta-row { justify-content: center; }
+}
+.video-frame video {
+  display: block; width: min(1200px, 100cqw, 100cqh * 704 / 628); height: auto;
+  aspect-ratio: 704 / 628; border-radius: 16px; border: 1px solid var(--border); background: #0b0b0d;
+  box-shadow: 0 40px 120px -40px rgba(120, 120, 255, .22);
+}
+
+/* The mascot: a WebGL jelly on a layer over the whole window (js/jelly.js). */
+.jelly { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 40; pointer-events: none; }
+.over-jelly, .over-jelly * { cursor: grab; }
+.is-grabbing, .is-grabbing * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }

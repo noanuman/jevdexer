@@ -1,0 +1,47 @@
+<UserControl x:Class="Jevdexer.App.KeyBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:app="clr-namespace:Jevdexer.App">
+    <StackPanel>
+        <!-- No key yet: paste one. -->
+        <StackPanel x:Name="EntryPanel">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <Border x:Name="EntryBox" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource Input}" Height="36" Padding="10,0">
+                    <Grid>
+                        <TextBlock x:Name="EntryHint" Text="Paste your AI Gateway key" Foreground="{DynamicResource MutedForeground}" VerticalAlignment="Center" IsHitTestVisible="False" FontSize="13.5" />
+                        <PasswordBox x:Name="Entry" Background="Transparent" BorderThickness="0" VerticalAlignment="Center" FontSize="13.5"
+                                     Foreground="{DynamicResource Foreground}" CaretBrush="{DynamicResource Foreground}" SelectionBrush="{DynamicResource Ring}"
+                                     PasswordChanged="Entry_PasswordChanged" KeyDown="Entry_KeyDown" GotKeyboardFocus="Entry_Focus" LostKeyboardFocus="Entry_Focus" />
+                    </Grid>
+                </Border>
+                <Button x:Name="SaveButton" Grid.Column="1" Style="{StaticResource Button}" Height="36" Margin="8,0,0,0" Click="Save_Click" IsEnabled="False">
+                    <TextBlock x:Name="SaveText" Text="Save" />
+                </Button>
+            </Grid>
+            <TextBlock x:Name="EntryError" Foreground="{DynamicResource Destructive}" FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" Visibility="Collapsed" />
+            <TextBlock FontSize="12.5" Margin="0,6,0,0" Foreground="{DynamicResource MutedForeground}" TextWrapping="Wrap">
+                <Run Text="Get one free at" />
+                <Hyperlink NavigateUri="https://vercel.com/ai-gateway" RequestNavigate="Link_RequestNavigate" Foreground="{DynamicResource Foreground}">vercel.com/ai-gateway</Hyperlink><Run Text=". It stays on this PC, encrypted." />
+            </TextBlock>
+        </StackPanel>
+
+        <!-- A key is saved: what it is, whether it works, and a way to remove it. -->
+        <Border x:Name="SavedPanel" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Border}" Padding="12,9" Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <app:Icon Data="{StaticResource Icon.Lock}" Size="14" Foreground="{DynamicResource MutedForeground}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                <TextBlock x:Name="Masked" Grid.Column="1" VerticalAlignment="Center" FontSize="13.5" TextTrimming="CharacterEllipsis" />
+                <Border Grid.Column="2" Style="{StaticResource Badge}" Padding="8,3" VerticalAlignment="Center" Margin="10,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="StatusDot" Width="7" Height="7" Fill="{DynamicResource MutedForeground}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="StatusText" Text="Checking..." FontSize="12" Margin="6,0,0,0" />
+                    </StackPanel>
+                </Border>
+                <Button Grid.Column="3" Style="{StaticResource Button.Ghost}" Height="30" Padding="10,0" Margin="6,0,-4,0" Click="Remove_Click" ToolTip="Remove the key from this PC">
+                    <TextBlock Text="Remove" FontSize="13" />
+                </Button>
+            </Grid>
+        </Border>
+    </StackPanel>
+</UserControl>

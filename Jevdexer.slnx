@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Jevdexer.App/Jevdexer.App.csproj" />
+    <Project Path="src/Jevdexer.Cli/Jevdexer.Cli.csproj" />
+    <Project Path="src/Jevdexer.Content/Jevdexer.Content.csproj" />
+    <Project Path="src/Jevdexer.Core/Jevdexer.Core.csproj" />
+    <Project Path="src/Jevdexer.Discovery/Jevdexer.Discovery.csproj" />
+    <Project Path="src/Jevdexer.Worker/Jevdexer.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Jevdexer.Core.Tests/Jevdexer.Core.Tests.csproj" />
+    <Project Path="tests/Jevdexer.Discovery.Tests/Jevdexer.Discovery.Tests.csproj" />
+  </Folder>
+</Solution>

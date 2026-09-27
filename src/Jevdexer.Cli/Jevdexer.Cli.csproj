@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jevdexer.Discovery\Jevdexer.Discovery.csproj" />
+    <ProjectReference Include="..\Jevdexer.Core\Jevdexer.Core.csproj" />
+    <!-- The sandboxed content worker ships next to the app (Ultra Search). -->
+    <ProjectReference Include="..\Jevdexer.Worker\Jevdexer.Worker.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>jevdexer</AssemblyName>
+  </PropertyGroup>
+
+</Project>
