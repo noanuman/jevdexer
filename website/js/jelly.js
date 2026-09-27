@@ -3,8 +3,9 @@
    The mesh is a soft body solved with XPBD in small substeps: every edge and diagonal is a soft
    spring, every triangle keeps its area (jelly does not compress), and a weak shape match pulls
    the whole body back to its drawn shape. Grab a spot and that spot follows the pointer while the
-   rest hangs from it under gravity and sloshes behind fast moves. Let go and it falls, splats on
-   the floor, sits for a moment, then hops back home. A click without a drag pokes it. */
+   rest hangs from it under gravity and sloshes behind fast moves. The headline, the buttons and
+   the video are solid: it bumps into them, slides along them and can rest on top of them. Let go
+   and it falls until something holds it up. A click without a drag pokes it. */
 (function () {
   const home = document.querySelector('[data-mascot-home]');
   if (!home) return;
@@ -23,13 +24,10 @@
     tx.setTransform(1, 0, 0, 1, 0, 0);
     tx.clearRect(0, 0, TEX, TEX);
     tx.setTransform(K, 0, 0, K, -U0 * K, -U0 * K);
-    // Body with a soft glow, then a thin rim of light so it reads on black.
+    // Body, then a thin rim of light so it reads on black.
     const g = tx.createRadialGradient(38.3, 33, 0, 38.3, 33, 75);
     g.addColorStop(0, '#2f2f34'); g.addColorStop(0.55, '#151518'); g.addColorStop(1, '#070708');
-    tx.save();
-    tx.shadowColor = 'rgba(255,255,255,0.10)'; tx.shadowBlur = 10 * K;
     tx.fillStyle = g; tx.fill(body);
-    tx.restore();
     tx.strokeStyle = 'rgba(255,255,255,0.28)'; tx.lineWidth = 0.7; tx.stroke(body);
     eye(39.65, 56.85, 6.72, 7.03, 42.32, 56.62, 4.93, 44.05, 54.65, 1.38);
     eye(69.78, 52.96, 6.45, 6.84, 67.49, 53.4, 5.03, 69.25, 51.39, 1.41);
@@ -189,13 +187,14 @@
   // Tuning. Compliance is inverse stiffness (XPBD); lengths in CSS px, time in seconds.
   const SUB = 12;
   const GRAVITY = 2300;
-  const C_EDGE = 2.2e-5, C_SHEAR = 5e-5, C_AREA = 1e-6, C_SHAPE = 9e-4, C_GRAB = 6e-7;
+  const C_EDGE = 2.2e-5, C_SHEAR = 5e-5, C_AREA = 1e-6, C_SHAPE = 9e-4, C_GRAB = 4e-8, C_GRAB_PRESSING = 3e-6;
   const RIGID_DAMP = 0.03, AIR = 0.4, FRICTION = 0.85, ROLL_DAMP = 0.06;
   const HOVER_K = 55, HOVER_Z = 0.55;
+  const REACH = 12;                   // px the grabbed spot may be pulled per substep
 
-  let mode = 'home';                 // home: hovering at home | held | fall | hop
+  let mode = 'home';                 // home: hovering at home | held | fall
   let cx = 0, cy = 0, vcx = 0, vcy = 0, theta = 0;
-  let restTime = 0, restSpeed = 1000, hopTime = 0, hopUntil = 0, time = 0, lastSplat = 0;
+  let time = 0, lastSplat = 0, grabLag = 0;
   const ptr = { x: -1e4, y: -1e4 }, aim = { x: 0, y: 0 }, lastPtr = { x: 0, y: 0 };
   let grabOffX = 0, grabOffY = 0;
 
@@ -271,21 +270,29 @@
       let Gx = 0, Gy = 0, S = 0;
       for (let i = 0; i < N; i++) if (gw[i]) { Gx += gw[i] * x[i]; Gy += gw[i] * y[i]; S += gw[i] * gw[i]; }
       const ox = co * grabOffX - si * grabOffY, oy = si * grabOffX + co * grabOffY;
-      const Cx = Gx - (aim.x - ox), Cy = Gy - (aim.y - oy);
-      const d = 1 / (S + C_GRAB / h2);
+      // Where the grabbed spot is asked to go: never inside a solid, and never more than REACH
+      // from where it is, so pushing into a wall or yanking hard cannot tear the body.
+      let tx = aim.x - ox, ty = aim.y - oy, pressing = false;
+      for (let k = 0; k < solids.length; k++) {
+        const sd = boxDistance(solids[k], tx, ty);
+        if (sd.d < 0) { tx += sd.nx * -sd.d; ty += sd.ny * -sd.d; pressing = true; }
+      }
+      const rx0 = tx - Gx, ry0 = ty - Gy, rl = Math.hypot(rx0, ry0);
+      if (rl > REACH) { tx = Gx + rx0 / rl * REACH; ty = Gy + ry0 / rl * REACH; }
+      const Cx = Gx - tx, Cy = Gy - ty;
+      grabLag = Math.hypot(aim.x - ox - Gx, aim.y - oy - Gy);
+      // A firm grip in open air (it keeps up with the pointer); a soft one while pushing into
+      // something, so the body gives way instead of folding over itself.
+      // (Crushed: last substep the hard limits had to hold several triangles back.)
+      if (crushed > 3) pressing = true;
+      const d = 1 / (S + (pressing ? C_GRAB_PRESSING : C_GRAB) / h2);
       for (let i = 0; i < N; i++) if (gw[i]) { x[i] -= gw[i] * Cx * d; y[i] -= gw[i] * Cy * d; }
     }
 
-    // Window edges, with friction (the skin grips). Vertices outside the drawn body may pass the
-    // edge by that much, so the visible body is what touches.
-    let hit = 0, contact = false;
-    for (let i = 0; i < N; i++) {
-      const o = out[i] * scale;
-      if (y[i] > H + o) { contact = true; hit = Math.max(hit, y[i] - py[i]); y[i] = H + o; x[i] = px[i] + (x[i] - px[i]) * (1 - FRICTION); }
-      else if (y[i] < -o) { y[i] = -o; x[i] = px[i] + (x[i] - px[i]) * (1 - FRICTION); }
-      if (x[i] > W + o) { hit = Math.max(hit, x[i] - px[i]); x[i] = W + o; y[i] = py[i] + (y[i] - py[i]) * (1 - FRICTION); }
-      else if (x[i] < -o) { hit = Math.max(hit, px[i] - x[i]); x[i] = -o; y[i] = py[i] + (y[i] - py[i]) * (1 - FRICTION); }
-    }
+    // Limits and collisions, twice: a collision push can flip a triangle, the second limits pass
+    // unflips it, and the second collision pass keeps everything outside the solids.
+    hit = 0; contact = false;
+    crushed = limitStrain(); collide(); limitStrain(); collide();
 
     // Velocities from the corrected positions, then damp only the wobble (not the motion).
     let L0 = 0, I0 = 0;
@@ -308,6 +315,106 @@
     if (hit / h > 1100 && time - lastSplat > 0.4) { lastSplat = time; blink(); }
   }
 
+  // Signed distance from a point to a rounded box (negative inside) and the outward normal.
+  function boxDistance(b, px0, py0) {
+    const dx = px0 - b.cx, dy = py0 - b.cy;
+    const qx0 = Math.abs(dx) - (b.hx - b.r), qy0 = Math.abs(dy) - (b.hy - b.r);
+    const sx = Math.sign(dx) || 1, sy = Math.sign(dy) || 1;
+    if (qx0 > 0 && qy0 > 0) {
+      const l = Math.hypot(qx0, qy0);
+      return { d: l - b.r, nx: qx0 / l * sx, ny: qy0 / l * sy };
+    }
+    if (qx0 > qy0) return { d: qx0 - b.r, nx: sx, ny: 0 };
+    return { d: qy0 - b.r, nx: 0, ny: sy };
+  }
+
+  // ---- Solid things on the page ----
+  let solids = [];
+  function measureSolids() {
+    const list = [];
+    const add = (r, radius) => {
+      if (r.width < 1 || r.height < 1) return;
+      list.push({ cx: r.left + r.width / 2, cy: r.top + r.height / 2, hx: r.width / 2, hy: r.height / 2, r: Math.min(radius, r.width / 2, r.height / 2) });
+    };
+    // Each line of the headline, tight to its text.
+    document.querySelectorAll('.title').forEach((el) => {
+      const range = document.createRange(); range.selectNodeContents(el);
+      Array.from(range.getClientRects()).forEach((r) => add(r, 6));
+    });
+    document.querySelectorAll('.cta-row a').forEach((el) => { const r = el.getBoundingClientRect(); add(r, r.height / 2); });
+    document.querySelectorAll('.video-frame video').forEach((el) => add(el.getBoundingClientRect(), 16));
+    solids = list;
+  }
+  measureSolids();
+  window.addEventListener('resize', measureSolids);
+  window.addEventListener('load', measureSolids);
+  if (document.fonts) document.fonts.ready.then(measureSolids);
+  setInterval(measureSolids, 1000);
+
+  let hit = 0, contact = false, crushed = 0;
+  function limitStrain() {
+    // Hard limits: no edge shorter than 55% or longer than 180% of its rest length, and no
+    // triangle below 35% of its area. Soft springs alone let a hard push fold the body over itself.
+    let held = 0;
+    for (let it = 0; it < 2; it++) {
+      for (let k = 0; k < E; k++) {
+        const a = edges[k][0], b = edges[k][1];
+        const dx = x[b] - x[a], dy = y[b] - y[a], len = Math.hypot(dx, dy) || 1e-9;
+        const lo = L[k] * 0.55, hi = L[k] * 1.8;
+        if (len >= lo && len <= hi) continue;
+        const c = ((len < lo ? lo : hi) - len) / 2 / len;
+        x[a] -= dx * c; y[a] -= dy * c; x[b] += dx * c; y[b] += dy * c;
+      }
+      for (let k = 0; k < T; k++) {
+        const t = tris[k], a = t[0], b = t[1], c = t[2];
+        const C = area(x, y, a, b, c) - A0[k] * 0.35;
+        if (C * Math.sign(A0[k]) >= 0) continue;
+        const gax = 0.5 * (y[b] - y[c]), gay = 0.5 * (x[c] - x[b]);
+        const gbx = 0.5 * (y[c] - y[a]), gby = 0.5 * (x[a] - x[c]);
+        const gcx = 0.5 * (y[a] - y[b]), gcy = 0.5 * (x[b] - x[a]);
+        const sg = gax * gax + gay * gay + gbx * gbx + gby * gby + gcx * gcx + gcy * gcy;
+        if (sg < 1e-12) continue;
+        if (it === 0) held++;
+        const dl = -C / sg;
+        x[a] += gax * dl; y[a] += gay * dl; x[b] += gbx * dl; y[b] += gby * dl; x[c] += gcx * dl; y[c] += gcy * dl;
+      }
+    }
+    return held;
+  }
+
+  function collide() {
+    // Window edges, with friction (the skin grips). Vertices outside the drawn body may pass the
+    // edge by that much, so the visible body is what touches.
+    for (let i = 0; i < N; i++) {
+      const o = out[i] * scale;
+      if (y[i] > H + o) { contact = true; hit = Math.max(hit, y[i] - py[i]); y[i] = H + o; x[i] = px[i] + (x[i] - px[i]) * (1 - FRICTION); }
+      else if (y[i] < -o) { y[i] = -o; x[i] = px[i] + (x[i] - px[i]) * (1 - FRICTION); }
+      if (x[i] > W + o) { hit = Math.max(hit, x[i] - px[i]); x[i] = W + o; y[i] = py[i] + (y[i] - py[i]) * (1 - FRICTION); }
+      else if (x[i] < -o) { hit = Math.max(hit, px[i] - x[i]); x[i] = -o; y[i] = py[i] + (y[i] - py[i]) * (1 - FRICTION); }
+  }
+
+    // The page's solid things (text lines, buttons, the video) as rounded boxes: a vertex inside
+    // one is pushed out along the surface normal, and its sliding is slowed by friction.
+    for (let k = 0; k < solids.length; k++) {
+      const b = solids[k];
+      for (let i = 0; i < N; i++) {
+        const o = out[i] * scale;
+        const dx = x[i] - b.cx, dy = y[i] - b.cy;
+        if (Math.abs(dx) > b.hx + o || Math.abs(dy) > b.hy + o) continue;
+        const { d, nx, ny } = boxDistance(b, x[i], y[i]);
+        if (d >= -o) continue;
+        const push = -o - d;
+        x[i] += nx * push; y[i] += ny * push;
+        // Friction on the tangential part of this substep's move.
+        const mx = x[i] - px[i], my = y[i] - py[i], mn = mx * nx + my * ny;
+        x[i] = px[i] + nx * mn + (mx - nx * mn) * (1 - FRICTION);
+        y[i] = py[i] + ny * mn + (my - ny * mn) * (1 - FRICTION);
+        if (ny < -0.5) contact = true;
+        hit = Math.max(hit, Math.abs(push));
+      }
+    }
+  }
+
   // ---- Loop ----
   const pos = new Float32Array(N * 2);
   let last = performance.now();
@@ -322,7 +429,6 @@
       substep(h); time += h;
     }
     lastPtr.x = ptr.x; lastPtr.y = ptr.y;
-    behave(dt);
     animateFace(dt);
     if (texDirty) upload();
     for (let i = 0; i < N; i++) { pos[i * 2] = x[i]; pos[i * 2 + 1] = y[i]; }
@@ -331,31 +437,6 @@
     gl.uniform2f(uView, W, H);
     gl.drawElements(gl.TRIANGLES, idx.length, gl.UNSIGNED_SHORT, 0);
     requestAnimationFrame(frame);
-  }
-
-  // Falling, resting, hopping home.
-  function behave(dt) {
-    if (mode === 'fall') {
-      // Resting: the centre has hardly moved lately (it still jiggles, so not its speed).
-      restSpeed += (Math.hypot(vcx, vcy) - restSpeed) * Math.min(1, dt * 3);
-      restTime = restSpeed < 70 ? restTime + dt : 0;
-      if (restTime > 0.9) hop();
-    } else if (mode === 'hop') {
-      hopTime += dt;
-      if (hopTime >= hopUntil) { mode = 'home'; }
-    }
-  }
-  function hop() {
-    // A ballistic jump that lands on the home spot, peaking a little above it.
-    centre();
-    const a = anchor();
-    const apex = Math.min(a.y, cy) - 70;
-    const up = Math.sqrt(2 * GRAVITY * Math.max(1, cy - apex));
-    const t1 = up / GRAVITY, t2 = Math.sqrt(2 * Math.max(1, a.y - apex) / GRAVITY);
-    const vxh = (a.x - cx) / (t1 + t2);
-    for (let i = 0; i < N; i++) { vx[i] = vxh; vy[i] = -up; }
-    mode = 'hop'; hopTime = 0; hopUntil = t1 + t2 * 0.85;
-    setMouth(1, 0.9);
   }
 
   // ---- Face ----
@@ -446,7 +527,7 @@
     down = null;
     document.documentElement.classList.remove('is-grabbing');
     if (!was) { poke(at.x, at.y); return; }
-    mode = 'fall'; restTime = 0; restSpeed = 1000;
+    mode = 'fall';
     setMouth(0);
   }
   window.addEventListener('pointerup', release);
@@ -462,6 +543,14 @@
     blink(); setMouth(1, 0.8);
   }
 
-  window.JJelly = { state: () => ({ mode, cx, cy, vcx, vcy, theta, N, T, E }), poke, hop };
+  function folded() {             // visible triangles turned inside out (for tests)
+    let n = 0;
+    for (let k = 0; k < T; k++) {
+      const t = tris[k];
+      if (out[t[0]] + out[t[1]] + out[t[2]] === 0 && area(x, y, t[0], t[1], t[2]) / A0[k] < 0) n++;
+    }
+    return n;
+  }
+  window.JJelly = { state: () => ({ mode, cx, cy, vcx, vcy, theta, N, T, E, solids: solids.length, folded: folded(), lag: grabLag }), poke };
   requestAnimationFrame(frame);
 })();
